@@ -24,9 +24,20 @@ import org.junit.runners.model.Statement;
  */
 @Slf4j
 public final class LdapServerRule implements TestRule {
+    /**
+     * LDAP server.
+     */
     private final transient InMemoryDirectoryServer server;
+    /**
+     * LDIF files.
+     */
     private final transient List<String> ldif;
 
+    /**
+     * Constructor.
+     * @param config LDAP server configuration
+     * @param files LDIF files to import
+     */
     public LdapServerRule(final InMemoryDirectoryServerConfig config,
         final List<String> files) {
         try {
@@ -37,14 +48,26 @@ public final class LdapServerRule implements TestRule {
         this.ldif = new ArrayList<>(files);
     }
 
+    /**
+     * Returns LDAP instance.
+     * @return LDAP instance
+     */
     public LDAPInterface server() {
         return this.server;
     }
 
+    /**
+     * Returns listen port.
+     * @return Listen port
+     */
     public int port() {
         return this.server.getListenPort();
     }
 
+    /**
+     * Import LDIF files.
+     * @throws LDAPException if error
+     */
     private void load() throws LDAPException {
         boolean clear = true;
         for (final String path : this.ldif) {
@@ -55,6 +78,7 @@ public final class LdapServerRule implements TestRule {
         }
     }
 
+    @Override
     public Statement apply(final Statement base, final Description desc) {
         return new Statement() {
             @Override
@@ -88,10 +112,23 @@ public final class LdapServerRule implements TestRule {
         };
     }
 
+    /**
+     * Rule builder.
+     */
     public static final class Builder {
+        /**
+         * LDAP server config.
+         */
         private final transient InMemoryDirectoryServerConfig config;
+        /**
+         * LDIF files.
+         */
         private final transient List<String> ldif;
 
+        /**
+         * Constructor.
+         * @param base Base DNs
+         */
         public Builder(final String... base) {
             this.ldif = new ArrayList<>(1);
             try {
@@ -101,6 +138,12 @@ public final class LdapServerRule implements TestRule {
             }
         }
 
+        /**
+         * Sets listen port.
+         * @param port Port number
+         * @return Builder instance
+         * @throws LDAPException if error
+         */
         public LdapServerRule.Builder listen(final int port)
             throws LDAPException {
             final List<InMemoryListenerConfig> listeners =
@@ -116,6 +159,12 @@ public final class LdapServerRule implements TestRule {
             return this;
         }
 
+        /**
+         * Add LDIF file to import from resources.
+         * @param path Path th the file
+         * @return Builder instance
+         * @throws IOException  if error
+         */
         public LdapServerRule.Builder resource(final String path)
             throws IOException {
 
@@ -130,11 +179,20 @@ public final class LdapServerRule implements TestRule {
             return this;
         }
 
+        /**
+         * Add LDIF file to import from a file system.
+         * @param path Path to the file
+         * @return Builder instance
+         */
         public LdapServerRule.Builder file(final String path) {
             this.ldif.add(path);
             return this;
         }
 
+        /**
+         * Builds the rule.
+         * @return LdapServerRule instance
+         */
         public LdapServerRule build() {
             return new LdapServerRule(this.config, this.ldif);
         }
