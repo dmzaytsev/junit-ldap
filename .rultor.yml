@@ -1,0 +1,9 @@
+decrypt:
+  settings.xml: "assets/settings.xml.asc"
+  pubring.gpg: "assets/pubring.gpg.asc"
+  secring.gpg: "assets/secring.gpg.asc"
+release:
+  script: |
+    mvn versions:set "-DnewVersion=${tag}"
+    git commit -am "${tag}"
+    mvn clean deploy -Pjcabi --settings /home/r/settings.xml
